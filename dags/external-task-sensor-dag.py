@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 
 def downstream_fuction():
     """
-    Waits 30 seconds before printing a statement to test dependency management,
+    Downstream function with print statement.
     """
     print('Upstream DAG has completed. Starting other tasks.')
 
