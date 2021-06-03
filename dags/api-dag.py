@@ -2,21 +2,22 @@ from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.providers.http.operators.http import SimpleHttpOperator
 from datetime import datetime, timedelta
+import json
 
 
 # Define body of POST request for the API call to trigger another DAG
-{
-  "dag_run_id": "string",
-  "execution_date": "2019-08-24T14:15:22Z",
-  "state": "success",
-  "conf": {}
+date = '{{ execution_date }}'
+request_body = {
+  "execution_date": date
 }
+json_body = json.dumps(request_body)
 
 def print_task_type(**kwargs):
     """
     Dummy function to call before and after depdendent DAG.
     """
     print(f"The {kwargs['task_type']} task has completed.")
+    print(request_body)
 
 
 default_args = {
@@ -45,8 +46,9 @@ with DAG('api-dag',
         task_id="api_trigger_dependent_dag",
         http_conn_id='airflow-api',
         endpoint='/api/v1/dags/dependent-dag/dagRuns',
-        method='GET',
-        headers={'Content-Type': 'application/json'}
+        method='POST',
+        headers={'Content-Type': 'application/json'},
+        data=json_body
     )
 
     end_task = PythonOperator(
